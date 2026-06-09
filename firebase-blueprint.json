@@ -1,0 +1,46 @@
+{
+  "entities": {
+    "BotStats": {
+      "title": "Bot Stats",
+      "description": "Real-time statistics for a bot",
+      "type": "object",
+      "properties": {
+        "chatCount": { "type": "number", "description": "Total messages sent to this bot" },
+        "likesCount": { "type": "number", "description": "Total likes for this bot" }
+      },
+      "required": ["chatCount", "likesCount"]
+    },
+    "UserData": {
+      "title": "User Data",
+      "description": "User specific data including personas, chats, and settings",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "personas": { "type": "array" },
+        "activePersonaId": { "type": "string" },
+        "chats": { "type": "object" },
+        "activeSessionIds": { "type": "object" },
+        "likedBots": { "type": "array" },
+        "apiKey": { "type": "string" },
+        "model": { "type": "string" },
+        "temperature": { "type": "number" },
+        "customApiUrl": { "type": "string" },
+        "provider": { "type": "string" },
+        "affectionLevels": { "type": "object" },
+        "isOnboarded": { "type": "boolean" },
+        "updatedAt": { "type": "number", "description": "Timestamp of last update" }
+      },
+      "required": ["userId"]
+    }
+  },
+  "firestore": {
+    "/bot_stats/{botId}": {
+      "schema": "BotStats",
+      "description": "Real-time stats for a specific bot"
+    },
+    "/users/{userId}": {
+      "schema": "UserData",
+      "description": "Data for a specific user"
+    }
+  }
+}
