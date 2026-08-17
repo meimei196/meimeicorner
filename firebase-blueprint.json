@@ -31,6 +31,30 @@
         "updatedAt": { "type": "number", "description": "Timestamp of last update" }
       },
       "required": ["userId"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "Anonymous feedback from users",
+      "type": "object",
+      "properties": {
+        "content": { "type": "string", "description": "The feedback text" },
+        "createdAt": { "type": "number", "description": "Timestamp when feedback was submitted" },
+        "status": { "type": "string", "description": "Status of the feedback (unread, read)" }
+      },
+      "required": ["content", "createdAt"]
+    },
+    "BotComment": {
+      "title": "Bot Comment",
+      "description": "Anonymous comments for a bot",
+      "type": "object",
+      "properties": {
+        "botId": { "type": "string", "description": "ID of the target bot" },
+        "nickname": { "type": "string", "description": "Nickname of the commenter" },
+        "content": { "type": "string", "description": "Comment content text" },
+        "images": { "type": "array", "description": "Array of compressed image data strings" },
+        "createdAt": { "type": "number", "description": "Timestamp of creation" }
+      },
+      "required": ["botId", "content", "createdAt"]
     }
   },
   "firestore": {
@@ -41,6 +65,14 @@
     "/users/{userId}": {
       "schema": "UserData",
       "description": "Data for a specific user"
+    },
+    "/feedbacks/{feedbackId}": {
+      "schema": "Feedback",
+      "description": "Anonymous feedbacks collection"
+    },
+    "/bot_comments/{commentId}": {
+      "schema": "BotComment",
+      "description": "Anonymous comments collection for bots"
     }
   }
 }

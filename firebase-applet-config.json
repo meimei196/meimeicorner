@@ -1,10 +1,10 @@
 {
-  "projectId": "remixed-project-id",
-  "appId": "remixed-app-id",
-  "apiKey": "remixed-api-key",
-  "authDomain": "remixed-auth-domain",
+"projectId": "meimei-83afe",
+  "appId": "1:115555259597:web:a4ef6bfa67ecb087250584",
+  "apiKey": "AIzaSyAO1wDNyzBS8g91S3ugKW8nsqUA61Oa5aU",
+  "authDomain": "meimeicorner.web.app",
   "firestoreDatabaseId": "remixed-firestore-database-id",
-  "storageBucket": "remixed-storage-bucket",
-  "messagingSenderId": "remixed-messaging-sender-id",
-  "measurementId": "remixed-measurement-id"
+  "storageBucket": "meimei-83afe.firebasestorage.app",
+  "messagingSenderId": "115555259597",
+  "measurementId": "G-0T5S9DWYLF"
 }

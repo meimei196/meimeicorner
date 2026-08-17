@@ -1,137 +1,167 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Lock, AlertCircle, ChevronRight, Lightbulb } from 'lucide-react';
+import { ChevronRight, ShieldAlert, HeartCrack } from 'lucide-react';
+import { signInAnonymously } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
 export function GuidelinesAuth({ onSuccess }: { onSuccess: () => void }) {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === 'meimeicorner2026') {
-      setError(false);
-      onSuccess();
-    } else {
-      setError(true);
+  const handleEnter = () => {
+    // Synchronously play a silent audio to unlock unmuted audio context for mobile browsers
+    try {
+      const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFRm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+      silentAudio.play().catch(() => {});
+    } catch {
+      // ignore
     }
+
+    // Trigger synchronous user gesture event to unlock mobile audio autoplay policy
+    window.dispatchEvent(new Event('app-user-entered'));
+
+    setIsLoggingIn(true);
+    
+    // Call onSuccess immediately so user enters app without any delay in FB In-App Browser
+    onSuccess();
+
+    // Perform Firebase anonymous sign-in in background
+    signInAnonymously(auth)
+      .then(() => {
+        setIsLoggingIn(false);
+      })
+      .catch((err) => {
+        console.warn("Firebase auth background warning:", err);
+        setIsLoggingIn(false);
+      });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative"
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="w-full max-w-xl max-h-[90vh] flex flex-col bg-zinc-950/90 backdrop-blur-2xl border border-zinc-800/60 rounded-3xl overflow-hidden shadow-2xl relative"
       >
-        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-zinc-700 via-zinc-400 to-zinc-700 z-10"></div>
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-zinc-800 via-zinc-400 to-zinc-800 z-10"></div>
         
-        <div className="p-8 sm:p-10 text-zinc-300 overflow-y-auto custom-scrollbar">
-          <h2 className="text-2xl font-bold text-center text-white mb-8 tracking-wide">
-            𝐒𝐨𝐦𝐞 𝐠𝐮𝐢𝐝𝐞𝐥𝐢𝐧𝐞𝐬 𝐟𝐨𝐫 𝐧𝐞𝐰𝐛𝐢𝐞𝐬
-          </h2>
+        {/* Sticky Header */}
+        <div className="pt-8 px-6 sm:px-10 pb-4 text-center shrink-0">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-100 serif-title drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] animate-pulse" style={{ animationDuration: '3s' }}>
+            <span className="relative inline-block">
+              meimeicorner
+              <motion.span
+                animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8], rotate: [0, 45, 90] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="absolute -top-3 -right-6 text-zinc-400"
+              >
+                ✦
+              </motion.span>
+              <motion.span
+                animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5], rotate: [90, 45, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: 1 }}
+                className="absolute -bottom-1 -left-4 text-zinc-500 text-sm"
+              >
+                ✦
+              </motion.span>
+            </span>
+          </h1>
+        </div>
 
-          <div className="space-y-4 text-sm leading-relaxed mb-8">
-            <p className="flex items-start gap-3">
-              <span className="text-zinc-500 mt-0.5">✎</span>
-              <span>Vui lòng <strong className="text-white">không</strong> share pass/link bot public ra ngoài</span>
-            </p>
-            <p className="flex items-start gap-3">
-              <span className="text-zinc-500 mt-0.5">✎</span>
-              <span>Hồ sơ giới thiệu bot trên web còn hơi sơ sài ｡°(°¯᷄◠¯᷅°)°｡ có gì sẽ update sau</span>
-            </p>
-            <p className="flex items-start gap-3">
-              <span className="text-zinc-500 mt-0.5">✎</span>
-              <span>Những prompt chat dưới đây có sử dụng AI hỗ trợ nên giọng văn sẽ khá cứng ( ;´ - `;) tui đang cố gắng khắc phục</span>
-            </p>
-            <p className="flex items-start gap-3">
-              <span className="text-zinc-500 mt-0.5">✎</span>
-              <span>Vì chưa thể pub hết link và cần testers nên đa phần những bản prompt này là bản draft, tui rất rất cần feedback của các bạn (,,&gt;ヮ&lt;,,)!</span>
-            </p>
+        {/* Scrollable Content */}
+        <div className="px-6 sm:px-10 pb-6 overflow-y-auto custom-scrollbar flex-1">
+          <div className="w-full bg-zinc-900/40 border border-zinc-800/60 p-5 sm:p-6 rounded-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-3 opacity-5">
+              <HeartCrack className="w-24 h-24 text-zinc-400" />
+            </div>
             
-            <div className="bg-white/5 border border-white/10 p-4 rounded-xl mt-4 flex gap-3 text-zinc-200">
-              <AlertCircle className="w-5 h-5 text-zinc-400 shrink-0 mt-0.5" />
+            <div className="flex items-center gap-3 mb-4 text-zinc-300">
+              <ShieldAlert className="w-6 h-6" />
+              <h3 className="text-base sm:text-lg font-bold tracking-widest uppercase">Disclaimer / Cảnh báo</h3>
+            </div>
+            
+            <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-zinc-400 relative z-10">
               <p>
-                <strong className="text-white">LƯU Ý:</strong> Những bot này chủ yếu là hàng ngược nhẹ tới nặng và thuần BG (do chưa có thời gian build BL hjhj) nên mong mọi người sẽ fb đúng hồ sơ user nữ
+                Chào mừng bạn đến với góc nhỏ của sốp. Trước khi bước vào, vui lòng lưu ý:
+              </p>
+              
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2">
+                  <span className="text-zinc-500 mt-0.5">✦</span>
+                  <span><strong>Nội dung 18+:</strong> Các bot ở đây đa phần theo khuynh hướng <strong>Dark Romance, Ngược luyến, NSFW 🔞</strong> và có thể chứa yếu tố bạo lực tâm lý/thể xác.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-zinc-500 mt-0.5">✦</span>
+                  <span><strong>Giả tưởng hoàn toàn:</strong> Mọi tình huống, tính cách nhân vật đều là hư cấu. Sốp <strong>tuyệt đối không</strong> cổ xúy hay khuyến khích các hành vi độc hại, bạo lực áp dụng vào thực tế. Hãy phân định rạch ròi giữa thế giới ảo và đời thực.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-zinc-500 mt-0.5">✦</span>
+                  <span><strong>Thử nghiệm:</strong> Các bot hiện vẫn đang trong quá trình test và hoàn thiện. Do sốp không sử dụng Discord nên mọi thứ sẽ được pub trực tiếp tại đây. Nếu có bất kỳ lỗi nào & muốn góp ý, có thể fb ẩn danh hoặc liên hệ qua FB của sốp.</span>
+                </li>
+              </ul>
+              
+              <p className="pt-2 text-zinc-300 font-medium italic text-center">
+                Nếu bé iu đã đủ 18 tuổi và có một tinh thần thép để đón nhận những chiếc cờ đỏ rực rỡ này...
               </p>
             </div>
+          </div>
+        </div>
 
-            <div className="bg-white/5 border border-white/10 p-4 rounded-xl mt-4 flex gap-3 text-zinc-200">
-              <Lightbulb className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-              <div className="space-y-2">
-                <p>
-                  <strong className="text-white">TIPS:</strong> vì để bot nhớ lâu hơn, mọi người sẽ điền thông tin user trong 'System instructions' -&gt; khi điền xong click nút 3 chấm góc phải -&gt; click 'Save prompt' trước khi chat.
-                </p>
-                <p>
-                  Ở bên dưới sẽ là hồ sơ/bối cảnh/lore cơ bản của {"{{"}user{"}}"} cho mọi người đọc tham khảo.
-                </p>
+        {/* Sticky Footer */}
+        <div className="p-6 sm:p-10 pt-2 shrink-0">
+          {/* Profile Platform Links */}
+          <div className="flex justify-center items-center gap-8 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-300 fill-mode-both">
+            <a 
+              href="https://yodayo.com/@meimei196" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group flex flex-col items-center gap-1.5 transition-all"
+            >
+              <div className="w-9 h-9 rounded-full bg-pink-500/5 border border-pink-500/10 flex items-center justify-center text-pink-300/40 group-hover:bg-pink-500/20 group-hover:border-pink-500/30 group-hover:text-pink-200 transition-all shadow-sm">
+                <span className="text-[9px] font-black tracking-tighter">YDY</span>
               </div>
-            </div>
+              <span className="text-[7px] uppercase tracking-[0.2em] text-zinc-600 font-bold group-hover:text-pink-400/60 transition-colors">Yodayo</span>
+            </a>
+            <a 
+              href="https://character.ai/profile/mei196" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group flex flex-col items-center gap-1.5 transition-all"
+            >
+              <div className="w-9 h-9 rounded-full bg-pink-500/5 border border-pink-500/10 flex items-center justify-center text-pink-300/40 group-hover:bg-pink-500/20 group-hover:border-pink-500/30 group-hover:text-pink-200 transition-all shadow-sm">
+                <span className="text-[9px] font-black tracking-tighter">C.AI</span>
+              </div>
+              <span className="text-[7px] uppercase tracking-[0.2em] text-zinc-600 font-bold group-hover:text-pink-400/60 transition-colors">C.AI</span>
+            </a>
+            <a 
+              href="https://xoul.ai/profile/meimei196" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group flex flex-col items-center gap-1.5 transition-all"
+            >
+              <div className="w-9 h-9 rounded-full bg-pink-500/5 border border-pink-500/10 flex items-center justify-center text-pink-300/40 group-hover:bg-pink-500/20 group-hover:border-pink-500/30 group-hover:text-pink-200 transition-all shadow-sm">
+                <span className="text-[9px] font-black tracking-tighter">XOL</span>
+              </div>
+              <span className="text-[7px] uppercase tracking-[0.2em] text-zinc-600 font-bold group-hover:text-pink-400/60 transition-colors">Xoul</span>
+            </a>
           </div>
 
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-white mb-4 italic">
-              𝑉𝑎̣̂𝑦 𝑚𝑜̣𝑖 𝑛𝑔𝑢̛𝑜̛̀𝑖 𝑛𝑒̂𝑛 𝑓𝑒𝑒𝑑𝑏𝑎𝑐𝑘 𝑐𝑎́𝑖 𝑔𝑖̀?
-            </h3>
-            <p className="text-xs text-zinc-400 mb-4">[rcm model 3.1 pro hoặc 3.5 flash vì tui thường chỉ test trên 2 con này]</p>
+          <button
+            onClick={handleEnter}
+            disabled={isLoggingIn}
+            className="relative w-full py-4 bg-gradient-to-r from-zinc-800 to-zinc-900 hover:from-zinc-700 hover:to-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 font-semibold tracking-wide transition-all flex items-center justify-center gap-2 group disabled:opacity-50 shadow-[0_0_15px_rgba(255,255,255,0.05)] overflow-hidden"
+          >
+            {/* Glowing sweep effect */}
+            <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
             
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start gap-2">
-                <span className="text-zinc-500 mt-0.5">⤷</span>
-                <span>Bot có đang bám sát tính cách không?</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-zinc-500 mt-0.5">⤷</span>
-                <span>Bot có trở nên mềm lòng/yêu user sớm không?</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-zinc-500 mt-0.5">⤷</span>
-                <span>Bot có nổi tính chiếm hữu tổng tài ngang không?</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-zinc-500 mt-0.5">⤷</span>
-                <span>Tình tiết RP có bị nhàm chán không?</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-zinc-500 mt-0.5">⤷</span>
-                <span>Xin thêm trải nghiệm của những bạn đã từng chat với bot bản cũ so với bản mới này (╥‸╥) tui sợ hong đúng ý users cũ...</span>
-              </li>
-            </ul>
-
-            <p className="text-sm italic text-zinc-400 bg-white/5 p-4 rounded-xl">
-              mà thời gian fb hong có deadline bắt buộc nên mấy bạn cứ thoải mái test nha =))))))) mọi người có thể fb thêm nhìu trải nghiệm khác nếu có, tui luôn hoan hỉ nhận ý kiến đóng góp và sẽ cân nhắc bổ sung ( ⸝⸝´ ᵕ `⸝⸝)
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-8 pt-8 border-t border-white/10">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-zinc-300">
-                Nhập mật khẩu để tiếp tục:
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-zinc-500" />
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`block w-full pl-12 pr-4 py-3 bg-black/50 border rounded-xl 
-                    text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-colors
-                    ${error ? 'border-red-500/50' : 'border-white/10'}`}
-                  placeholder="Enter password..."
-                />
-                <button
-                  type="submit"
-                  className="absolute inset-y-1 right-1 px-4 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors flex items-center justify-center"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-              {error && (
-                <p className="text-red-400 text-xs mt-1">Sai mật khẩu! Vui lòng thử lại.</p>
-              )}
-            </div>
-          </form>
+            {isLoggingIn ? (
+              <div className="w-5 h-5 border-2 border-zinc-400 border-t-zinc-100 rounded-full animate-spin relative z-10"></div>
+            ) : (
+              <span className="relative z-10 flex items-center gap-2">
+                mời zào đây cùng sốp <span className="group-hover:animate-bounce">𝜗ৎ</span>
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            )}
+          </button>
         </div>
       </motion.div>
     </div>

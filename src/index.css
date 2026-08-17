@@ -26,6 +26,26 @@ body {
 }
 
 /* Glassmorphism utilities */
+.neon-title {
+  color: #ffffff;
+  animation: neonGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes neonGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 4px rgba(255, 255, 255, 0.9),
+      0 0 10px rgba(240, 220, 255, 0.6),
+      0 0 20px rgba(192, 132, 252, 0.35);
+  }
+  50% {
+    text-shadow: 
+      0 0 6px rgba(255, 255, 255, 1),
+      0 0 14px rgba(244, 208, 254, 0.75),
+      0 0 26px rgba(168, 85, 247, 0.45);
+  }
+}
+
 .glass {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(12px);
@@ -78,4 +98,3 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
-

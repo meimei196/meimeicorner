@@ -94,5 +94,19 @@ service cloud.firestore {
 
       allow delete: if false;
     }
+
+    match /feedbacks/{feedbackId} {
+      allow read, delete: if true;
+      allow create: if incoming().content is string && incoming().content.size() <= 2000;
+      allow update: if false;
+    }
+
+    match /bot_comments/{commentId} {
+      allow read, delete: if true;
+      allow create: if incoming().botId is string &&
+                      incoming().content is string && incoming().content.size() <= 2000 &&
+                      incoming().createdAt is number;
+      allow update: if false;
+    }
   }
 }
