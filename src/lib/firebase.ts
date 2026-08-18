@@ -5,7 +5,11 @@ import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 
-export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-});
-export const auth = getAuth();
+export const db = initializeFirestore(
+  app,
+  {
+    experimentalAutoDetectLongPolling: true,
+  },
+  (firebaseConfig as any).firestoreDatabaseId || '(default)'
+);
+export const auth = getAuth(app);

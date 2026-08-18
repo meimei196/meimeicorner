@@ -1,6 +1,8 @@
 {
   "name": "𝑚𝑒𝑖𝑚𝑒𝑖𝑐𝑜𝑟𝑛𝑒𝑟",
-  "description": "A pastel glassmorphism roleplay web chat with AI-powered storytelling and customizable personas.",
+  "description": "meimeicorner - Khám phá các bot nhân vật, bình luận ẩn danh gắn kèm ảnh với lightbox, và giao lưu tại Forum Tám Zai.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

@@ -1,7 +1,9 @@
 import { useState, useRef, ReactNode } from 'react';
 import { Bot, bots } from '../data/bots';
-import { ArrowLeft, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, ExternalLink, ChevronDown, ChevronUp, User } from 'lucide-react';
 import { useStore } from '../lib/store';
+import { useAuthStore } from '../lib/user-auth-store';
+import { BotCommentsSection } from './BotCommentsSection';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -41,6 +43,7 @@ function CollapsibleSection({ title, content }: CollapsibleSectionProps) {
 export function BotProfile({ botId, onBack }: { botId: string; onBack: () => void }) {
   const bot = bots.find(b => b.id === botId);
   const stats = useStore((state) => state.botStats[botId]) || { chatCount: 0, likesCount: 0 };
+  const { currentUser, isAdmin, setIsAuthModalOpen } = useAuthStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToTop = () => {
@@ -77,21 +80,47 @@ export function BotProfile({ botId, onBack }: { botId: string; onBack: () => voi
 
   return (
     <div className="flex flex-col h-full w-full bg-transparent">
-      <header className="sticky top-0 z-50 p-4 flex items-center justify-center bg-black/60 backdrop-blur-md border-b border-white/10 shadow-sm relative">
+      <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between bg-black/60 backdrop-blur-md border-b border-white/10 shadow-sm relative">
         <button 
           onClick={onBack}
-          className="absolute left-4 w-10 h-10 rounded-full flex items-center justify-center text-zinc-100 hover:bg-white/10 transition-colors"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-zinc-100 hover:bg-white/10 transition-colors cursor-pointer"
+          title="Quay lại"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="text-center truncate max-w-[70%]">
-          <h1 className="text-lg font-bold text-zinc-100 serif-title">{bot.name}</h1>
+
+        <div className="text-center truncate max-w-[60%]">
+          <h1 className="text-base sm:text-lg font-bold text-zinc-100 serif-title truncate">{bot.name}</h1>
           <p className="text-[10px] text-zinc-400 truncate">{bot.description}</p>
         </div>
+
+        <button
+          onClick={() => setIsAuthModalOpen(true)}
+          className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer overflow-hidden shadow-sm ${
+            isAdmin
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+              : currentUser
+              ? 'bg-zinc-950/80 border-pink-400/30 text-pink-300'
+              : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
+          }`}
+          title={currentUser ? `Hồ sơ: ${currentUser.nickname || currentUser.username}` : 'Đăng nhập / Đăng ký'}
+        >
+          {currentUser ? (
+            currentUser.avatar ? (
+              <img src={currentUser.avatar} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs font-bold font-serif">
+                {(currentUser.nickname || currentUser.username).charAt(0).toUpperCase()}
+              </span>
+            )
+          ) : (
+            <User className="w-4 h-4" />
+          )}
+        </button>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative">
-        <div className="max-w-2xl mx-auto p-4 md:p-8 space-y-8">
+        <div className="max-w-2xl mx-auto p-4 md:p-8 space-y-8 pb-16">
           
           {/* Cover & Avatar */}
           <div className="flex flex-col items-center">
@@ -187,6 +216,11 @@ export function BotProfile({ botId, onBack }: { botId: string; onBack: () => voi
                 content={<p className="text-zinc-300 whitespace-pre-wrap text-sm leading-relaxed opacity-80">{renderFormattedText(bot.charPrompt)}</p>}
               />
             )}
+          </div>
+
+          {/* Anonymous Comments Section for this Bot */}
+          <div className="pt-2">
+            <BotCommentsSection botId={bot.id} botName={bot.name} />
           </div>
 
         </div>

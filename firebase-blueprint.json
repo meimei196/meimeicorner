@@ -55,6 +55,36 @@
         "createdAt": { "type": "number", "description": "Timestamp of creation" }
       },
       "required": ["botId", "content", "createdAt"]
+    },
+    "ForumPost": {
+      "title": "Forum Post",
+      "description": "Post in Forum Tam Zai",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the post" },
+        "content": { "type": "string", "description": "Content of the post" },
+        "nickname": { "type": "string", "description": "Nickname of the author" },
+        "botName": { "type": "string", "description": "Associated bot name or general" },
+        "tag": { "type": "string", "description": "Topic category tag" },
+        "images": { "type": "array", "description": "Array of compressed image strings" },
+        "reactions": { "type": "object", "description": "Map of reaction counts" },
+        "commentCount": { "type": "number", "description": "Number of comments" },
+        "createdAt": { "type": "number", "description": "Timestamp of creation" }
+      },
+      "required": ["title", "content", "createdAt"]
+    },
+    "ForumComment": {
+      "title": "Forum Comment",
+      "description": "Comments under forum posts",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string", "description": "Target forum post ID" },
+        "nickname": { "type": "string", "description": "Nickname of commenter" },
+        "content": { "type": "string", "description": "Comment content text" },
+        "images": { "type": "array", "description": "Array of compressed image strings" },
+        "createdAt": { "type": "number", "description": "Timestamp of creation" }
+      },
+      "required": ["postId", "content", "createdAt"]
     }
   },
   "firestore": {
@@ -73,6 +103,14 @@
     "/bot_comments/{commentId}": {
       "schema": "BotComment",
       "description": "Anonymous comments collection for bots"
+    },
+    "/forum_posts/{postId}": {
+      "schema": "ForumPost",
+      "description": "Community posts in forum tam zai"
+    },
+    "/forum_comments/{commentId}": {
+      "schema": "ForumComment",
+      "description": "Comments in community forum"
     }
   }
 }

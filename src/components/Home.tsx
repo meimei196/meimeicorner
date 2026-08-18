@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect, UIEvent, useMemo, useCallback } from 'react';
 import { Bot, UpcomingBot, bots as allBots, upcomingBots } from '../data/bots';
-import { Filter, ArrowUp, ArrowDown, Facebook, ChevronLeft, ChevronRight, X, Sparkles, BookOpen } from 'lucide-react';
+import { Filter, ArrowUp, ArrowDown, Facebook, ChevronLeft, ChevronRight, X, Sparkles, BookOpen, MessageSquare, User } from 'lucide-react';
 import { FeedbackModal } from './FeedbackModal';
 import { AnonymousFeedback } from './AnonymousFeedback';
 import { FortuneWidget } from './FortuneWidget';
 import { BeginnerGuideModal } from './BeginnerGuideModal';
 import { motion, AnimatePresence } from 'motion/react';
-import { playCardClickSound } from '../lib/sound';
+import { playCardClickSound, playFortuneClickSound } from '../lib/sound';
+import { useAuthStore } from '../lib/user-auth-store';
 
-export function Home({ onSelectBot }: { onSelectBot: (id: string) => void }) {
+export function Home({ onSelectBot, onOpenForum }: { onSelectBot: (id: string) => void; onOpenForum?: () => void }) {
+  const { currentUser, isAdmin, setIsAuthModalOpen } = useAuthStore();
   const [search, setSearch] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showTags, setShowTags] = useState(false);
@@ -140,6 +142,33 @@ export function Home({ onSelectBot }: { onSelectBot: (id: string) => void }) {
   return (
     <div ref={containerRef} className="flex flex-col min-h-full max-w-5xl mx-auto relative">
       <header className="p-6 text-center relative">
+        {/* Top right Round Profile / Login button */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all shadow-md cursor-pointer overflow-hidden backdrop-blur-md ${
+              isAdmin
+                ? 'border-amber-400/40 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.3)] text-amber-300'
+                : currentUser
+                ? 'border-pink-400/40 bg-zinc-950/80 text-pink-300'
+                : 'border-white/15 bg-zinc-950/70 text-zinc-400 hover:text-white hover:border-white/30'
+            }`}
+            title={currentUser ? `Hồ sơ: ${currentUser.nickname || currentUser.username}` : 'Đăng nhập / Đăng ký'}
+          >
+            {currentUser ? (
+              currentUser.avatar ? (
+                <img src={currentUser.avatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs font-bold font-serif">
+                  {(currentUser.nickname || currentUser.username).charAt(0).toUpperCase()}
+                </span>
+              )
+            ) : (
+              <User className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-100 serif-title mb-1 neon-title">
           <span className="relative inline-block">
             meimeicorner
@@ -163,6 +192,27 @@ export function Home({ onSelectBot }: { onSelectBot: (id: string) => void }) {
 
         <FortuneWidget />
         <AnonymousFeedback />
+
+        {/* Nút Forum Tám Zai đặt dưới mục Feedback cho sốp */}
+        <div className="flex justify-center mt-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              playFortuneClickSound();
+              onOpenForum?.();
+            }}
+            className="relative flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-pink-950/40 via-purple-950/40 to-pink-950/40 border border-pink-500/30 text-pink-200 text-sm font-serif italic hover:border-pink-400 hover:text-white transition-all shadow-[0_0_20px_rgba(244,114,182,0.12)] hover:shadow-[0_0_25px_rgba(244,114,182,0.25)] group overflow-hidden active:scale-95 cursor-pointer"
+          >
+            <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]"></div>
+            <MessageSquare className="w-4 h-4 text-pink-300 group-hover:scale-110 transition-transform" />
+            <span className="relative z-10 font-bold tracking-wide">
+              forum tám zai 𝜗ৎ
+            </span>
+            <span className="px-1.5 py-0.2 rounded-md bg-pink-500/20 text-[9px] font-sans font-bold text-pink-100 uppercase tracking-widest border border-pink-500/30">
+              Mới
+            </span>
+          </button>
+        </div>
 
         <div className="flex justify-center items-center mt-6">
           <div className="relative w-full max-w-md flex items-center" ref={tagsRef}>

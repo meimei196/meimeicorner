@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Home } from './components/Home';
 import { BotProfile } from './components/BotProfile';
+import { ForumPage } from './components/ForumPage';
+import { UserAuthModal } from './components/UserAuthModal';
 import { GuidelinesAuth } from './components/GuidelinesAuth';
 import { RandomHusbandWidget } from './components/RandomHusbandWidget';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -14,20 +16,26 @@ import { Particles } from './components/Particles';
 import { HeartTrail } from './components/HeartTrail';
 
 export default function App() {
-  const getBotFromUrl = () => {
+  const getInitialStateFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
     const queryBot = params.get('bot');
-    if (queryBot) return queryBot;
-
     const hash = window.location.hash.replace(/^#\/?/, '');
-    if (hash) {
-      if (hash.startsWith('bot=')) return hash.replace('bot=', '');
-      return hash;
+
+    if (viewParam === 'forum' || hash === 'forum') {
+      return { botId: null, isForum: true };
     }
-    return null;
+
+    if (queryBot) return { botId: queryBot, isForum: false };
+
+    if (hash) {
+      if (hash.startsWith('bot=')) return { botId: hash.replace('bot=', ''), isForum: false };
+      if (hash !== 'forum') return { botId: hash, isForum: false };
+    }
+    return { botId: null, isForum: false };
   };
 
-  const [selectedBotId, setSelectedBotId] = useState<string | null>(getBotFromUrl);
+  const [routeState, setRouteState] = useState(getInitialStateFromUrl);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
       return sessionStorage.getItem('hasAcceptedDisclaimer') === 'true';
@@ -47,7 +55,7 @@ export default function App() {
 
   useEffect(() => {
     const handleUrlChange = () => {
-      setSelectedBotId(getBotFromUrl());
+      setRouteState(getInitialStateFromUrl());
     };
 
     window.addEventListener('popstate', handleUrlChange);
@@ -59,13 +67,25 @@ export default function App() {
   }, []);
 
   const handleSelectBot = (id: string | null) => {
-    setSelectedBotId(id);
     if (id) {
+      setRouteState({ botId: id, isForum: false });
       const newUrl = `${window.location.pathname}?bot=${encodeURIComponent(id)}`;
       window.history.pushState({ botId: id }, '', newUrl);
     } else {
-      window.history.pushState({ botId: null }, '', window.location.pathname);
+      setRouteState({ botId: null, isForum: false });
+      window.history.pushState({}, '', window.location.pathname);
     }
+  };
+
+  const handleOpenForum = () => {
+    setRouteState({ botId: null, isForum: true });
+    const newUrl = `${window.location.pathname}?view=forum`;
+    window.history.pushState({ view: 'forum' }, '', newUrl);
+  };
+
+  const handleBackToHome = () => {
+    setRouteState({ botId: null, isForum: false });
+    window.history.pushState({}, '', window.location.pathname);
   };
 
   if (!isAuthenticated) {
@@ -90,21 +110,46 @@ export default function App() {
       {/* Main Content Area */}
       <div className="relative z-10 flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          {selectedBotId ? (
-            <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="h-full w-full">
-              <BotProfile botId={selectedBotId} onBack={() => handleSelectBot(null)} />
+          {routeState.isForum ? (
+            <motion.div
+              key="forum"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="h-full w-full"
+            >
+              <ForumPage onBack={handleBackToHome} onSelectBot={handleSelectBot} />
+            </motion.div>
+          ) : routeState.botId ? (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="h-full w-full"
+            >
+              <BotProfile botId={routeState.botId} onBack={handleBackToHome} />
             </motion.div>
           ) : (
-            <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="h-full overflow-y-auto w-full">
-              <Home onSelectBot={handleSelectBot} />
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="h-full overflow-y-auto w-full"
+            >
+              <Home onSelectBot={handleSelectBot} onOpenForum={handleOpenForum} />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {!selectedBotId && <RandomHusbandWidget onSelectBot={handleSelectBot} />}
+      {!routeState.botId && !routeState.isForum && (
+        <RandomHusbandWidget onSelectBot={handleSelectBot} />
+      )}
       <MusicPlayer />
       <HeartTrail />
+      <UserAuthModal />
     </div>
   );
 }
